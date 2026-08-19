@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "enchanted_forest:block/enchanted_heartwood"
+    },
+    "axis=x": {
+      "model": "enchanted_forest:block/enchanted_heartwood",
+      "x": 90,
+      "y": 90
+    },
+    "axis=z": {
+      "model": "enchanted_forest:block/enchanted_heartwood",
+      "x": 90
+    }
+  }
+}

@@ -1,0 +1,7 @@
+.gradle/
+.jitpack-gradle-home/
+build/
+run/
+out/
+*.iml
+.idea/

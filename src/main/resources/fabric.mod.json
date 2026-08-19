@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "enchanted_forest",
+	"version": "${version}",
+	"name": "Enchanted Forest",
+	"description": "A luminous enchanted forest of glinting trees, glow berries, fireflies, and magical flowers.",
+	"authors": ["lilkuzco-dev"],
+	"contact": {
+		"sources": "https://github.com/lilkuzco-dev/enchanted-forest"
+	},
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["dev.lilkuzco.enchantedforest.EnchantedForest"],
+		"client": ["dev.lilkuzco.enchantedforest.client.EnchantedForestClient"]
+	},
+	"mixins": ["enchanted_forest.mixins.json"],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.lilkuzco.enchantedforest.mixin",
+	"mixins": [
+		"MultiNoiseBiomeSourceMixin",
+		"MultiNoiseBiomeSourceParameterListMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

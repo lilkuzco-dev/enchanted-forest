@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "enchanted_forest:starflower",
+    "enchanted_forest:fairy_bloom",
+    "enchanted_forest:crystal_moss",
+    "enchanted_forest:enchanted_sapling"
+  ]
+}

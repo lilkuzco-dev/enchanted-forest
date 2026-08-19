@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "enchanted_forest:blocks/crystal_moss",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "enchanted_forest:crystal_moss"
+        }
+      ]
+    }
+  ]
+}

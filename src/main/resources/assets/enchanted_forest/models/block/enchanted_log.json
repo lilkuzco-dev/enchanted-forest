@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "enchanted_forest:block/enchanted_log_top",
+    "side": "enchanted_forest:block/enchanted_log"
+  }
+}
