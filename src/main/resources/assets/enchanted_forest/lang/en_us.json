@@ -8,5 +8,8 @@
   "block.enchanted_forest.enchanted_sapling": "Enchanted Sapling",
   "block.enchanted_forest.fairy_bloom": "Fairy Bloom",
   "block.enchanted_forest.starflower": "Starflower",
+  "entity.enchanted_forest.enchanted_bear": "Enchanted Bear",
+  "entity.enchanted_forest.enchanted_bird": "Enchanted Bird",
+  "entity.enchanted_forest.enchanted_fox": "Enchanted Fox",
   "itemGroup.enchanted_forest.main": "Enchanted Forest"
 }

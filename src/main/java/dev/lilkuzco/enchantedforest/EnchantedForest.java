@@ -19,6 +19,7 @@ public final class EnchantedForest implements ModInitializer {
 		EnchantedForestBlocks.register();
 		EnchantedForestBlocks.registerInteractions();
 		EnchantedForestBlockEntities.register();
+		EnchantedForestEntities.register();
 		EnchantedForestItems.register();
 		EnchantedForestTab.register();
 		EnchantedForestWorldgen.register();

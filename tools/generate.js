@@ -49,10 +49,9 @@ function clamp(value, low = 0, high = 1) {
 	return Math.max(low, Math.min(high, value));
 }
 
-/** Recolors vanilla pixels without changing their shape, transparency, or shading. */
-function recolorVanilla(source, output, transform) {
+/** Recolors vanilla pixels without changing their shape, transparency, or UV layout. */
+function recolorTexture(source, output, transform) {
 	const image = png.decode(fs.readFileSync(path.join(VANILLA, `${source}.png`)));
-	if (image.w !== 16 || image.h !== 16) throw new Error(`${source} must be 16x16`);
 	for (let i = 0; i < image.px.length; i += 4) {
 		if (image.px[i + 3] === 0) continue;
 		const [h, s, l] = rgbToHsl(image.px[i], image.px[i + 1], image.px[i + 2]);
@@ -60,9 +59,13 @@ function recolorVanilla(source, output, transform) {
 		const [r, g, b] = hslToRgb(nextH, clamp(nextS), clamp(nextL));
 		image.px[i] = r; image.px[i + 1] = g; image.px[i + 2] = b;
 	}
-	const file = A("textures", "block", `${output}.png`);
+	const file = A("textures", `${output}.png`);
 	fs.mkdirSync(path.dirname(file), { recursive: true });
 	fs.writeFileSync(file, png.encode(image.w, image.h, image.px));
+}
+
+function recolorVanilla(source, output, transform) {
+	recolorTexture(source, `block/${output}`, transform);
 }
 
 const fixedEnchantedHue = (hue, saturation, lightScale = 1, lightOffset = 0) =>
@@ -98,6 +101,34 @@ function textures() {
 	recolorVanilla("short_grass", "crystal_moss", fixedEnchantedHue(0.47, 0.72, 1.12, 0.015));
 }
 
+function enchantedBirdHue(h, s, l) {
+	if (l < 0.15) return [0.71, 0.42, clamp(l * 1.12, 0.035, 0.22)];
+	if (s < 0.16) return [0.74, 0.58, clamp(l * 1.02, 0.08, 0.9)];
+	return [(h + 0.31) % 1, Math.max(0.68, s), clamp(l * 1.05 + 0.01, 0.08, 0.9)];
+}
+
+function enchantedFoxHue(_h, s, l) {
+	if (l < 0.16) return [0.71, 0.5, clamp(l * 1.15, 0.035, 0.22)];
+	if (s < 0.2 && l > 0.48) return [0.51, 0.55, clamp(l * 1.02, 0.48, 0.92)];
+	return [0.76, Math.max(0.62, s), clamp(l * 1.02 + 0.015, 0.08, 0.88)];
+}
+
+function enchantedBearHue(_h, _s, l) {
+	if (l < 0.3) return [0.71, 0.55, clamp(l * 1.05, 0.035, 0.3)];
+	return [0.54, 0.52, clamp(l * 0.93 + 0.035, 0.3, 0.9)];
+}
+
+function entityTextures() {
+	for (const variant of ["red_blue", "blue", "green", "yellow_blue", "grey"]) {
+		recolorTexture(`entity/parrot_${variant}`, `entity/enchanted_bird_${variant}`, enchantedBirdHue);
+	}
+	for (const state of ["fox", "fox_baby", "fox_sleep", "fox_sleep_baby"]) {
+		recolorTexture(`entity/${state}`, `entity/enchanted_${state}`, enchantedFoxHue);
+	}
+	recolorTexture("entity/polarbear", "entity/enchanted_bear", enchantedBearHue);
+	recolorTexture("entity/polarbear_baby", "entity/enchanted_bear_baby", enchantedBearHue);
+}
+
 const BLOCKS = {
 	enchanted_heartwood: { name: "Enchanted Heartwood", kind: "pillar", side: "enchanted_heartwood", top: "enchanted_heartwood_top" },
 	enchanted_log: { name: "Enchanted Log", kind: "pillar", side: "enchanted_log", top: "enchanted_log_top" },
@@ -110,7 +141,13 @@ const BLOCKS = {
 };
 
 function assets() {
-	const lang = { "itemGroup.enchanted_forest.main": "Enchanted Forest", "biome.enchanted_forest.enchanted_forest": "Enchanted Forest" };
+	const lang = {
+		"itemGroup.enchanted_forest.main": "Enchanted Forest",
+		"biome.enchanted_forest.enchanted_forest": "Enchanted Forest",
+		"entity.enchanted_forest.enchanted_bird": "Enchanted Bird",
+		"entity.enchanted_forest.enchanted_fox": "Enchanted Fox",
+		"entity.enchanted_forest.enchanted_bear": "Enchanted Bear",
+	};
 	for (const [id, block] of Object.entries(BLOCKS)) {
 		if (block.kind === "pillar") {
 			write(A("blockstates", `${id}.json`), { variants: {
@@ -142,6 +179,31 @@ function assets() {
 	write(D("recipe", "enchanted_planks.json"), {
 		type: "minecraft:crafting_shapeless", category: "building", group: "planks",
 		ingredients: [`#${NS}:enchanted_logs`], result: { count: 4, id: `${NS}:enchanted_planks` },
+	});
+}
+
+function entityLoot() {
+	write(D("loot_table", "entities", "enchanted_bird.json"), {
+		type: "minecraft:entity", random_sequence: `${NS}:entities/enchanted_bird`, pools: [{
+			rolls: 1, entries: [{ type: "minecraft:item", name: "minecraft:feather", functions: [{
+				function: "minecraft:set_count", count: { type: "minecraft:uniform", min: 1, max: 2 },
+			}] }],
+		}],
+	});
+	write(D("loot_table", "entities", "enchanted_fox.json"), {
+		type: "minecraft:entity", random_sequence: `${NS}:entities/enchanted_fox`,
+	});
+	write(D("loot_table", "entities", "enchanted_bear.json"), {
+		type: "minecraft:entity", random_sequence: `${NS}:entities/enchanted_bear`, pools: [{
+			rolls: 1, entries: [
+				{ type: "minecraft:item", name: "minecraft:cod", weight: 3, functions: [{
+					function: "minecraft:set_count", count: { type: "minecraft:uniform", min: 0, max: 2 },
+				}] },
+				{ type: "minecraft:item", name: "minecraft:salmon", functions: [{
+					function: "minecraft:set_count", count: { type: "minecraft:uniform", min: 0, max: 2 },
+				}] },
+			],
+		}],
 	});
 }
 
@@ -195,8 +257,10 @@ function worldgen() {
 			ambient: [{ type: "minecraft:bat", weight: 10, minCount: 8, maxCount: 8 }],
 			axolotls: [{ type: "minecraft:axolotl", weight: 10, minCount: 4, maxCount: 6 }],
 			creature: [
+				{ type: `${NS}:enchanted_bird`, weight: 24, minCount: 3, maxCount: 6 },
+				{ type: `${NS}:enchanted_fox`, weight: 10, minCount: 2, maxCount: 4 },
+				{ type: `${NS}:enchanted_bear`, weight: 3, minCount: 1, maxCount: 2 },
 				{ type: "minecraft:rabbit", weight: 12, minCount: 2, maxCount: 4 },
-				{ type: "minecraft:fox", weight: 8, minCount: 2, maxCount: 3 },
 				{ type: "minecraft:sheep", weight: 8, minCount: 3, maxCount: 4 },
 			],
 			misc: [],
@@ -230,5 +294,5 @@ function tags() {
 	writeTag(NS, "block/enchanted_logs", logs); writeTag(NS, "item/enchanted_logs", logs);
 }
 
-textures(); assets(); worldgen(); tags();
+textures(); entityTextures(); assets(); entityLoot(); worldgen(); tags();
 console.log(`generated ${Object.keys(BLOCKS).length} Enchanted Forest blocks and biome resources`);
