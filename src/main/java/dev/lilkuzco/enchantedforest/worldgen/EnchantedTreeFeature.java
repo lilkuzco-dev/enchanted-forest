@@ -13,9 +13,12 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
-/** A fixed-height luminous tree whose base is the single render anchor for its glint. */
+/** A vanilla-oak-scale luminous tree whose base is the single render anchor for its glint. */
 public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration> {
-	public static final int TRUNK_HEIGHT = 8;
+	public static final int TRUNK_HEIGHT = 5;
+	public static final int TOTAL_HEIGHT = 7;
+	private static final int CANOPY_BASE_Y = 3;
+	private static final int[] CANOPY_RADII = {2, 2, 2, 1};
 
 	public EnchantedTreeFeature() {
 		super(NoneFeatureConfiguration.CODEC);
@@ -42,8 +45,8 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 	}
 
 	private static boolean hasRoom(WorldGenLevel level, BlockPos origin) {
-		for (int y = 0; y <= 10; y++) {
-			int radius = y < 4 ? 0 : 3;
+		for (int y = 0; y < TOTAL_HEIGHT; y++) {
+			int radius = y < CANOPY_BASE_Y ? 0 : 2;
 			for (int x = -radius; x <= radius; x++) {
 				for (int z = -radius; z <= radius; z++) {
 					BlockState state = level.getBlockState(origin.offset(x, y, z));
@@ -57,10 +60,9 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 	}
 
 	private static void placeCanopy(WorldGenLevel level, BlockPos origin, RandomSource random) {
-		int[] radii = {2, 3, 3, 2, 2, 1};
-		for (int layer = 0; layer < radii.length; layer++) {
-			int y = 4 + layer;
-			int radius = radii[layer];
+		for (int layer = 0; layer < CANOPY_RADII.length; layer++) {
+			int y = CANOPY_BASE_Y + layer;
+			int radius = CANOPY_RADII[layer];
 			for (int x = -radius; x <= radius; x++) {
 				for (int z = -radius; z <= radius; z++) {
 					if (x == 0 && z == 0 && y < TRUNK_HEIGHT) {
@@ -90,7 +92,7 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 	private static void placeGlowBerryVines(WorldGenLevel level, BlockPos origin, RandomSource random) {
 		int[][] anchors = {{2, 0}, {-2, 0}, {0, 2}, {0, -2}, {2, 1}, {-1, -2}};
 		for (int[] anchor : anchors) {
-			BlockPos top = origin.offset(anchor[0], 3, anchor[1]);
+			BlockPos top = origin.offset(anchor[0], CANOPY_BASE_Y - 1, anchor[1]);
 			if (!level.getBlockState(top).isAir()
 					|| !level.getBlockState(top.above()).is(EnchantedForestBlocks.ENCHANTED_LEAVES)) {
 				continue;
@@ -113,7 +115,8 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 	}
 
 	private static void placeSporeBlossoms(WorldGenLevel level, BlockPos origin) {
-		for (int[] offset : new int[][] {{1, 3, 1}, {-1, 3, -1}, {1, 3, -1}}) {
+		for (int[] offset : new int[][] {{1, CANOPY_BASE_Y - 1, 1},
+				{-1, CANOPY_BASE_Y - 1, -1}, {1, CANOPY_BASE_Y - 1, -1}}) {
 			BlockPos pos = origin.offset(offset[0], offset[1], offset[2]);
 			if (level.getBlockState(pos).isAir()) {
 				level.setBlock(pos, Blocks.SPORE_BLOSSOM.defaultBlockState(), 2);

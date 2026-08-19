@@ -220,7 +220,7 @@ const patchFeature = block => ({ type: "minecraft:random_patch", config: {
 function worldgen() {
 	write(D("worldgen", "configured_feature", "enchanted_tree.json"), { type: `${NS}:enchanted_tree`, config: {} });
 	write(D("worldgen", "placed_feature", "enchanted_trees.json"), { feature: `${NS}:enchanted_tree`, placement: [
-		{ type: "minecraft:count", count: 12 }, { type: "minecraft:in_square" },
+		{ type: "minecraft:count", count: 8 }, { type: "minecraft:in_square" },
 		{ type: "minecraft:surface_water_depth_filter", max_water_depth: 0 },
 		{ type: "minecraft:heightmap", heightmap: "OCEAN_FLOOR" }, { type: "minecraft:biome" },
 	] });

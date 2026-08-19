@@ -17,6 +17,21 @@ loom {
 			sourceSet sourceSets.client
 		}
 	}
+	runs {
+		gametest {
+			inherit client
+			vmArg "-Dfabric.client.gametest"
+			runDir "build/run-gametest"
+		}
+	}
+}
+
+tasks.matching { it.name == 'runGametest' }.configureEach {
+	doFirst {
+		def runDir = file('build/run-gametest')
+		runDir.mkdirs()
+		new File(runDir, 'eula.txt').text = "# disposable remote render test\neula=true\n"
+	}
 }
 
 dependencies {

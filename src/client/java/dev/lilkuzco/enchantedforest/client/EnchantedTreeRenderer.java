@@ -62,12 +62,7 @@ public final class EnchantedTreeRenderer
 	}
 
 	@Override
-	public boolean shouldRenderOffScreen() {
-		return true;
-	}
-
-	@Override
 	public int getViewDistance() {
-		return 96;
+		return 64;
 	}
 }
