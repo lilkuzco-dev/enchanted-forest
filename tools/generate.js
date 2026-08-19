@@ -207,14 +207,8 @@ function entityLoot() {
 	});
 }
 
-const patchFeature = block => ({ type: "minecraft:random_patch", config: {
-	feature: { feature: { type: "minecraft:simple_block", config: {
-		to_place: { type: "minecraft:simple_state_provider", state: { Name: `${NS}:${block}` } },
-	} }, placement: [
-		{ type: "minecraft:block_predicate_filter", predicate: { type: "minecraft:all_of", predicates: [
-			{ type: "minecraft:replaceable" }, { type: "minecraft:would_survive", state: { Name: `${NS}:${block}` } },
-		] } },
-	] }, tries: 64, xz_spread: 5, y_spread: 2,
+const patchFeature = block => ({ type: "minecraft:simple_block", config: {
+	to_place: { type: "minecraft:simple_state_provider", state: { Name: `${NS}:${block}` } },
 } });
 
 function worldgen() {
@@ -229,6 +223,14 @@ function worldgen() {
 		write(D("worldgen", "placed_feature", `patch_${id}.json`), { feature: `${NS}:patch_${id}`, placement: [
 			{ type: "minecraft:count", count }, { type: "minecraft:in_square" },
 			{ type: "minecraft:heightmap", heightmap: "WORLD_SURFACE_WG" }, { type: "minecraft:biome" },
+			{ type: "minecraft:count", count: 32 },
+			{ type: "minecraft:random_offset",
+				xz_spread: { type: "minecraft:trapezoid", min: -5, max: 5, plateau: 0 },
+				y_spread: { type: "minecraft:trapezoid", min: -2, max: 2, plateau: 0 } },
+			{ type: "minecraft:block_predicate_filter", predicate: { type: "minecraft:all_of", predicates: [
+				{ type: "minecraft:matching_block_tag", tag: "minecraft:air" },
+				{ type: "minecraft:would_survive", state: { Name: `${NS}:${id}` } },
+			] } },
 		] });
 	}
 
