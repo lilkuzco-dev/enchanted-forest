@@ -99,16 +99,16 @@
     ],
     [
       "minecraft:glow_lichen",
+      "minecraft:forest_flowers",
       "enchanted_forest:enchanted_trees",
       "enchanted_forest:patch_starflower",
       "enchanted_forest:patch_fairy_bloom",
       "enchanted_forest:patch_crystal_moss",
-      "minecraft:patch_firefly_bush_swamp",
-      "minecraft:patch_firefly_bush_near_water",
-      "minecraft:forest_flowers",
       "minecraft:patch_grass_forest",
       "minecraft:brown_mushroom_normal",
-      "minecraft:red_mushroom_normal"
+      "minecraft:red_mushroom_normal",
+      "minecraft:patch_firefly_bush_swamp",
+      "minecraft:patch_firefly_bush_near_water"
     ],
     [
       "minecraft:freeze_top_layer"
