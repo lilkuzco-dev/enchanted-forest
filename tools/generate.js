@@ -5,6 +5,7 @@ const png = require("./png.js");
 
 const NS = "enchanted_forest";
 const ROOT = path.join(__dirname, "..", "src", "main", "resources");
+const VANILLA = path.join(__dirname, "vanilla");
 const A = (...parts) => path.join(ROOT, "assets", NS, ...parts);
 const D = (...parts) => path.join(ROOT, "data", NS, ...parts);
 const write = (file, value) => {
@@ -12,131 +13,89 @@ const write = (file, value) => {
 	fs.writeFileSync(file, JSON.stringify(value, null, 2) + "\n");
 };
 
-function randomFor(name) {
-	let seed = 2166136261;
-	for (const char of name) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619);
-	return () => {
-		seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
-		let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+function rgbToHsl(r, g, b) {
+	r /= 255; g /= 255; b /= 255;
+	const max = Math.max(r, g, b), min = Math.min(r, g, b);
+	let h = 0, s = 0;
+	const l = (max + min) / 2;
+	if (max !== min) {
+		const d = max - min;
+		s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+		if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+		else if (max === g) h = (b - r) / d + 2;
+		else h = (r - g) / d + 4;
+		h /= 6;
+	}
+	return [h, s, l];
+}
+
+function hslToRgb(h, s, l) {
+	const hue = (p, q, t) => {
+		if (t < 0) t += 1;
+		if (t > 1) t -= 1;
+		if (t < 1 / 6) return p + (q - p) * 6 * t;
+		if (t < 1 / 2) return q;
+		if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+		return p;
+	};
+	if (s === 0) return [l, l, l].map(v => Math.round(v * 255));
+	const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+	const p = 2 * l - q;
+	return [hue(p, q, h + 1 / 3), hue(p, q, h), hue(p, q, h - 1 / 3)]
+		.map(v => Math.round(v * 255));
+}
+
+function clamp(value, low = 0, high = 1) {
+	return Math.max(low, Math.min(high, value));
+}
+
+/** Recolors vanilla pixels without changing their shape, transparency, or shading. */
+function recolorVanilla(source, output, transform) {
+	const image = png.decode(fs.readFileSync(path.join(VANILLA, `${source}.png`)));
+	if (image.w !== 16 || image.h !== 16) throw new Error(`${source} must be 16x16`);
+	for (let i = 0; i < image.px.length; i += 4) {
+		if (image.px[i + 3] === 0) continue;
+		const [h, s, l] = rgbToHsl(image.px[i], image.px[i + 1], image.px[i + 2]);
+		const [nextH, nextS, nextL] = transform(h, s, l);
+		const [r, g, b] = hslToRgb(nextH, clamp(nextS), clamp(nextL));
+		image.px[i] = r; image.px[i + 1] = g; image.px[i + 2] = b;
+	}
+	const file = A("textures", "block", `${output}.png`);
+	fs.mkdirSync(path.dirname(file), { recursive: true });
+	fs.writeFileSync(file, png.encode(image.w, image.h, image.px));
+}
+
+const fixedEnchantedHue = (hue, saturation, lightScale = 1, lightOffset = 0) =>
+	(_h, _s, l) => [hue, saturation, clamp(l * lightScale + lightOffset, 0.05, 0.92)];
+
+function recolorPlant(petalHue) {
+	return (h, s, l) => {
+		// Vanilla stems and leaves become bright turquoise while their exact pixels remain intact.
+		if (h >= 0.18 && h <= 0.48 && s > 0.12) {
+			return [0.46, Math.max(0.58, s), clamp(l * 1.08 + 0.015, 0.08, 0.88)];
+		}
+		// Preserve the recognizable warm flower centers as enchanted gold.
+		if (h >= 0.08 && h < 0.18 && s > 0.3) {
+			return [0.12, Math.max(0.72, s), clamp(l * 1.08, 0.12, 0.9)];
+		}
+		return [petalHue, Math.max(0.62, s), clamp(l * 1.04 + 0.02, 0.1, 0.92)];
 	};
 }
 
-class Canvas {
-	constructor(name) {
-		this.name = name;
-		this.pixels = Buffer.alloc(16 * 16 * 4);
-		this.random = randomFor(name);
-	}
-	set(x, y, color, alpha = 255) {
-		if (x < 0 || y < 0 || x >= 16 || y >= 16) return;
-		const offset = (y * 16 + x) * 4;
-		this.pixels[offset] = color[0];
-		this.pixels[offset + 1] = color[1];
-		this.pixels[offset + 2] = color[2];
-		this.pixels[offset + 3] = alpha;
-	}
-	fill(color, alpha = 255) {
-		for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) this.set(x, y, color, alpha);
-	}
-	write() {
-		const file = A("textures", "block", `${this.name}.png`);
-		fs.mkdirSync(path.dirname(file), { recursive: true });
-		fs.writeFileSync(file, png.encode(16, 16, this.pixels));
-	}
-}
-
-const COLORS = {
-	indigo: [31, 28, 75], blue: [38, 91, 128], cyan: [72, 231, 219],
-	mint: [83, 207, 164], violet: [175, 104, 255], pink: [255, 119, 232],
-	gold: [255, 223, 112], pale: [221, 255, 248], moss: [42, 145, 132],
-};
-
-function bark(name, base, bright) {
-	const c = new Canvas(name); c.fill(base);
-	for (let x = 0; x < 16; x++) for (let y = 0; y < 16; y++) {
-		const r = c.random();
-		if (r < 0.22) c.set(x, y, base.map(v => Math.max(0, v - 18)));
-		else if (r > 0.91 || (x + y * 3) % 23 === 0) c.set(x, y, bright);
-	}
-	for (let n = 0; n < 8; n++) {
-		let x = Math.floor(c.random() * 16);
-		for (let y = 0; y < 16; y++) {
-			if (c.random() < 0.28) x += c.random() < 0.5 ? -1 : 1;
-			c.set(x, y, c.random() < 0.2 ? COLORS.pink : bright);
-		}
-	}
-	c.write();
-}
-
-function rings(name, base) {
-	const c = new Canvas(name);
-	for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
-		const distance = Math.hypot(x - 7.5, y - 7.5);
-		const ring = Math.sin(distance * 2.6) > 0;
-		c.set(x, y, distance > 6.8 ? COLORS.indigo : ring ? base : COLORS.cyan);
-	}
-	for (const [x, y] of [[3, 4], [11, 5], [6, 12], [12, 11]]) c.set(x, y, COLORS.gold);
-	c.write();
-}
-
-function leaves() {
-	const c = new Canvas("enchanted_leaves");
-	for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
-		const r = c.random();
-		if (r < 0.15) c.set(x, y, [0, 0, 0], 0);
-		else if (r < 0.52) c.set(x, y, COLORS.moss);
-		else if (r < 0.87) c.set(x, y, COLORS.mint);
-		else c.set(x, y, c.random() < 0.5 ? COLORS.cyan : COLORS.violet);
-	}
-	c.write();
-}
-
-function planks() {
-	const c = new Canvas("enchanted_planks"); c.fill(COLORS.blue);
-	for (const y of [0, 5, 10, 15]) for (let x = 0; x < 16; x++) c.set(x, y, COLORS.indigo);
-	for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
-		if ((x * 5 + y * 7) % 37 === 0) c.set(x, y, COLORS.cyan);
-	}
-	c.write();
-}
-
-function sapling() {
-	const c = new Canvas("enchanted_sapling");
-	for (let y = 5; y < 16; y++) c.set(7, y, COLORS.blue);
-	for (const [x, y] of [[6, 6], [8, 5], [5, 8], [9, 8], [4, 11], [10, 11], [7, 3]]) {
-		c.set(x, y, COLORS.mint); c.set(x + 1, y, COLORS.cyan); c.set(x, y + 1, COLORS.violet);
-	}
-	c.write();
-}
-
-function flower(name, petals, center) {
-	const c = new Canvas(name);
-	for (let y = 8; y < 16; y++) c.set(7, y, COLORS.moss);
-	for (const [x, y] of [[7, 5], [5, 7], [9, 7], [7, 9], [6, 6], [8, 6], [6, 8], [8, 8]]) c.set(x, y, petals);
-	c.set(7, 7, center); c.set(7, 6, COLORS.pale); c.write();
-}
-
-function moss() {
-	const c = new Canvas("crystal_moss");
-	for (let y = 9; y < 16; y++) for (let x = 0; x < 16; x++) {
-		if (c.random() < 0.72 || y > 13) c.set(x, y, c.random() < 0.75 ? COLORS.moss : COLORS.cyan);
-	}
-	for (const [x, y] of [[2, 9], [6, 7], [10, 8], [13, 6]]) {
-		c.set(x, y, COLORS.pale); c.set(x, y + 1, COLORS.violet);
-	}
-	c.write();
-}
-
 function textures() {
-	bark("enchanted_log", COLORS.blue, COLORS.cyan);
-	bark("enchanted_heartwood", COLORS.indigo, COLORS.violet);
-	rings("enchanted_log_top", COLORS.blue);
-	rings("enchanted_heartwood_top", COLORS.violet);
-	leaves(); planks(); sapling(); moss();
-	flower("starflower", COLORS.cyan, COLORS.gold);
-	flower("fairy_bloom", COLORS.violet, COLORS.pale);
+	// Keep Mojang's oak grain and rings exactly; only the palette changes.
+	recolorVanilla("oak_log", "enchanted_log", fixedEnchantedHue(0.53, 0.68, 0.98, 0.02));
+	recolorVanilla("oak_log_top", "enchanted_log_top", fixedEnchantedHue(0.51, 0.72, 1.02, 0.015));
+	recolorVanilla("oak_log", "enchanted_heartwood", fixedEnchantedHue(0.76, 0.66, 0.9, -0.015));
+	recolorVanilla("oak_log_top", "enchanted_heartwood_top", fixedEnchantedHue(0.76, 0.72, 0.96));
+	recolorVanilla("oak_planks", "enchanted_planks", fixedEnchantedHue(0.55, 0.63, 0.98, 0.015));
+	recolorVanilla("oak_leaves", "enchanted_leaves", fixedEnchantedHue(0.45, 0.7, 1.08, 0.02));
+	recolorVanilla("oak_sapling", "enchanted_sapling", recolorPlant(0.76));
+
+	// Custom luminous plants now retain familiar vanilla silhouettes.
+	recolorVanilla("allium", "starflower", recolorPlant(0.51));
+	recolorVanilla("oxeye_daisy", "fairy_bloom", recolorPlant(0.78));
+	recolorVanilla("short_grass", "crystal_moss", fixedEnchantedHue(0.47, 0.72, 1.12, 0.015));
 }
 
 const BLOCKS = {
