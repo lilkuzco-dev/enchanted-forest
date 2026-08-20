@@ -86,14 +86,16 @@ function recolorPlant(petalHue) {
 }
 
 function textures() {
-	// Keep Mojang's oak grain and rings exactly; only the palette changes.
-	recolorVanilla("oak_log", "enchanted_log", fixedEnchantedHue(0.53, 0.68, 0.98, 0.02));
-	recolorVanilla("oak_log_top", "enchanted_log_top", fixedEnchantedHue(0.51, 0.72, 1.02, 0.015));
-	recolorVanilla("oak_log", "enchanted_heartwood", fixedEnchantedHue(0.76, 0.66, 0.9, -0.015));
-	recolorVanilla("oak_log_top", "enchanted_heartwood_top", fixedEnchantedHue(0.76, 0.72, 0.96));
-	recolorVanilla("oak_planks", "enchanted_planks", fixedEnchantedHue(0.55, 0.63, 0.98, 0.015));
-	recolorVanilla("oak_leaves", "enchanted_leaves", fixedEnchantedHue(0.45, 0.7, 1.08, 0.02));
-	recolorVanilla("oak_sapling", "enchanted_sapling", recolorPlant(0.76));
+	// Keep Mojang's oak grain, rings and silhouettes exactly. Every part of the
+	// enchanted tree now belongs to one violet palette; the former cyan trunk,
+	// teal leaves and purple heartwood made each individual tree look mismatched.
+	recolorVanilla("oak_log", "enchanted_log", fixedEnchantedHue(0.76, 0.72, 0.96, 0.015));
+	recolorVanilla("oak_log_top", "enchanted_log_top", fixedEnchantedHue(0.75, 0.75, 1.0, 0.01));
+	recolorVanilla("oak_log", "enchanted_heartwood", fixedEnchantedHue(0.78, 0.7, 0.86, -0.015));
+	recolorVanilla("oak_log_top", "enchanted_heartwood_top", fixedEnchantedHue(0.78, 0.76, 0.92));
+	recolorVanilla("oak_planks", "enchanted_planks", fixedEnchantedHue(0.76, 0.68, 0.97, 0.015));
+	recolorVanilla("oak_leaves", "enchanted_leaves", fixedEnchantedHue(0.73, 0.76, 1.04, 0.015));
+	recolorVanilla("oak_sapling", "enchanted_sapling", fixedEnchantedHue(0.75, 0.75, 1.04, 0.015));
 
 	// Custom luminous plants now retain familiar vanilla silhouettes.
 	recolorVanilla("allium", "starflower", recolorPlant(0.51));
@@ -214,11 +216,13 @@ const patchFeature = block => ({ type: "minecraft:simple_block", config: {
 function worldgen() {
 	write(D("worldgen", "configured_feature", "enchanted_tree.json"), { type: `${NS}:enchanted_tree`, config: {} });
 	write(D("worldgen", "placed_feature", "enchanted_trees.json"), { feature: `${NS}:enchanted_tree`, placement: [
-		{ type: "minecraft:count", count: 8 }, { type: "minecraft:in_square" },
+		// Dark-forest density after failed placements: large canopies naturally reject
+		// overlapping attempts, so 18 attempts produces roughly 9–13 real trees.
+		{ type: "minecraft:count", count: 18 }, { type: "minecraft:in_square" },
 		{ type: "minecraft:surface_water_depth_filter", max_water_depth: 0 },
 		{ type: "minecraft:heightmap", heightmap: "OCEAN_FLOOR" }, { type: "minecraft:biome" },
 	] });
-	for (const [id, count] of [["starflower", 4], ["fairy_bloom", 2], ["crystal_moss", 5]]) {
+	for (const [id, count] of [["starflower", 7], ["fairy_bloom", 5], ["crystal_moss", 12]]) {
 		write(D("worldgen", "configured_feature", `patch_${id}.json`), patchFeature(id));
 		write(D("worldgen", "placed_feature", `patch_${id}.json`), { feature: `${NS}:patch_${id}`, placement: [
 			{ type: "minecraft:count", count }, { type: "minecraft:in_square" },
@@ -247,12 +251,12 @@ function worldgen() {
 		},
 		carvers: ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"],
 		downfall: 0.8,
-		effects: { water_color: "#6557e8", foliage_color: "#51d9b4", grass_color: "#65d79f", dry_foliage_color: "#a26ee8" },
+		effects: { water_color: "#6557e8", foliage_color: "#8c64e8", grass_color: "#7661d6", dry_foliage_color: "#b17fe8" },
 		features: [[], ["minecraft:lake_lava_underground", "minecraft:lake_lava_surface"], ["minecraft:amethyst_geode"],
 			["minecraft:monster_room", "minecraft:monster_room_deep"], [], [],
 			["minecraft:ore_dirt", "minecraft:ore_gravel", "minecraft:ore_granite_upper", "minecraft:ore_granite_lower", "minecraft:ore_diorite_upper", "minecraft:ore_diorite_lower", "minecraft:ore_andesite_upper", "minecraft:ore_andesite_lower", "minecraft:ore_tuff", "minecraft:ore_coal_upper", "minecraft:ore_coal_lower", "minecraft:ore_iron_upper", "minecraft:ore_iron_middle", "minecraft:ore_iron_small", "minecraft:ore_gold", "minecraft:ore_gold_lower", "minecraft:ore_redstone", "minecraft:ore_redstone_lower", "minecraft:ore_diamond", "minecraft:ore_diamond_medium", "minecraft:ore_diamond_large", "minecraft:ore_diamond_buried", "minecraft:ore_lapis", "minecraft:ore_lapis_buried", "minecraft:ore_copper", "minecraft:underwater_magma", "minecraft:disk_sand", "minecraft:disk_clay", "minecraft:disk_gravel"],
 			[], ["minecraft:spring_water", "minecraft:spring_lava"],
-			["minecraft:glow_lichen", "minecraft:forest_flowers", `${NS}:enchanted_trees`, `${NS}:patch_starflower`, `${NS}:patch_fairy_bloom`, `${NS}:patch_crystal_moss`, "minecraft:patch_grass_forest", "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_firefly_bush_swamp", "minecraft:patch_firefly_bush_near_water"],
+			["minecraft:glow_lichen", `${NS}:enchanted_trees`, `${NS}:patch_starflower`, `${NS}:patch_fairy_bloom`, `${NS}:patch_crystal_moss`, "minecraft:brown_mushroom_normal", "minecraft:red_mushroom_normal", "minecraft:patch_firefly_bush_swamp", "minecraft:patch_firefly_bush_near_water"],
 			["minecraft:freeze_top_layer"]],
 		has_precipitation: true, spawn_costs: {}, temperature: 0.7,
 		spawners: {

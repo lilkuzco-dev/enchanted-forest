@@ -45,12 +45,27 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 	}
 
 	private static boolean hasRoom(WorldGenLevel level, BlockPos origin) {
+		// Keep trunks at least three blocks apart, but allow neighboring canopies to
+		// merge. Rejecting every existing leaf made most of the configured attempts
+		// fail and turned an 8-attempt "forest" into a few isolated plains trees.
+		for (int x = -2; x <= 2; x++) {
+			for (int z = -2; z <= 2; z++) {
+				for (int y = -2; y <= TOTAL_HEIGHT; y++) {
+					BlockState nearby = level.getBlockState(origin.offset(x, y, z));
+					if (nearby.is(EnchantedForestBlocks.ENCHANTED_HEARTWOOD)
+							|| nearby.is(EnchantedForestBlocks.ENCHANTED_LOG)) {
+						return false;
+					}
+				}
+			}
+		}
 		for (int y = 0; y < TOTAL_HEIGHT; y++) {
 			int radius = y < CANOPY_BASE_Y ? 0 : 2;
 			for (int x = -radius; x <= radius; x++) {
 				for (int z = -radius; z <= radius; z++) {
 					BlockState state = level.getBlockState(origin.offset(x, y, z));
-					if (!state.isAir() && !state.is(BlockTags.REPLACEABLE_BY_TREES)) {
+					if (!state.isAir() && !state.is(BlockTags.REPLACEABLE_BY_TREES)
+							&& !state.is(EnchantedForestBlocks.ENCHANTED_LEAVES)) {
 						return false;
 					}
 				}

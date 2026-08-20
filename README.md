@@ -1,5 +1,13 @@
 # Enchanted Forest
 
+## v0.1.6 — a forest, not a plains
+
+Tree placement now makes roughly 9–13 successful vanilla-height trees per chunk
+instead of a sparse handful. Ordinary forest flowers and vanilla grass patches have
+been removed in favor of much denser starflowers, fairy blooms, and crystal moss.
+Every part of every enchanted tree now uses one coherent purple palette—from leaves
+and sapling through heartwood and trunk—beneath the matching enchanted glint.
+
 A Minecraft 26.2 Fabric biome built around luminous vegetation and trees whose trunks
 carry the moving purple glint used by enchanted equipment.
 

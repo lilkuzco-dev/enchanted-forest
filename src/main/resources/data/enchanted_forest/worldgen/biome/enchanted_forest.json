@@ -42,9 +42,9 @@
   "downfall": 0.8,
   "effects": {
     "water_color": "#6557e8",
-    "foliage_color": "#51d9b4",
-    "grass_color": "#65d79f",
-    "dry_foliage_color": "#a26ee8"
+    "foliage_color": "#8c64e8",
+    "grass_color": "#7661d6",
+    "dry_foliage_color": "#b17fe8"
   },
   "features": [
     [],
@@ -99,12 +99,10 @@
     ],
     [
       "minecraft:glow_lichen",
-      "minecraft:forest_flowers",
       "enchanted_forest:enchanted_trees",
       "enchanted_forest:patch_starflower",
       "enchanted_forest:patch_fairy_bloom",
       "enchanted_forest:patch_crystal_moss",
-      "minecraft:patch_grass_forest",
       "minecraft:brown_mushroom_normal",
       "minecraft:red_mushroom_normal",
       "minecraft:patch_firefly_bush_swamp",

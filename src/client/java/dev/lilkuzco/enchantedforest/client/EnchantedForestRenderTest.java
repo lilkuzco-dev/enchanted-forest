@@ -32,7 +32,14 @@ public final class EnchantedForestRenderTest implements FabricClientGameTest {
 			server.runCommand("kill @e[type=!minecraft:player]");
 			server.runCommand("execute at @p run fill ~-18 ~-1 ~-18 ~18 ~-1 ~18 minecraft:grass_block");
 			server.runCommand("execute at @p run fill ~-18 ~ ~-18 ~18 ~16 ~18 minecraft:air");
-			server.runCommand("execute at @p run place feature enchanted_forest:enchanted_tree ~4 ~ ~4");
+			// A full grove makes both palette consistency and actual forest density
+			// visible in one frame; a single showcase tree cannot catch a plains biome.
+			for (int x : new int[] {-8, -4, 0, 4, 8}) {
+				for (int z : new int[] {4, 9, 14}) {
+					server.runCommand("execute at @p run place feature enchanted_forest:enchanted_tree ~"
+							+ x + " ~ ~" + z);
+				}
+			}
 			server.runCommand("execute at @p run summon enchanted_forest:enchanted_bird ~-3 ~3 ~3 {NoAI:1b,PersistenceRequired:1b}");
 			server.runCommand("execute at @p run summon enchanted_forest:enchanted_fox ~0 ~ ~4 {NoAI:1b,PersistenceRequired:1b}");
 			server.runCommand("execute at @p run summon enchanted_forest:enchanted_bear ~-4 ~ ~6 {NoAI:1b,PersistenceRequired:1b}");
@@ -43,7 +50,7 @@ public final class EnchantedForestRenderTest implements FabricClientGameTest {
 			server.runCommand("gamemode spectator @p");
 			server.runCommand("execute at @p run tp @p ~0 ~4 ~-12 0 10");
 			context.waitTicks(60);
-			context.takeScreenshot("enchanted_forest_tree_and_wildlife");
+			context.takeScreenshot("enchanted_forest_purple_grove_and_wildlife");
 		}
 	}
 
@@ -57,12 +64,14 @@ public final class EnchantedForestRenderTest implements FabricClientGameTest {
 
 		BlockPos player = level.players().getFirst().blockPosition();
 		BlockPos base = null;
-		for (BlockPos candidate : BlockPos.betweenClosed(player.offset(-12, -2, -2), player.offset(12, 2, 12))) {
+		int treeBases = 0;
+		for (BlockPos candidate : BlockPos.betweenClosed(player.offset(-12, -2, -2), player.offset(12, 2, 18))) {
 			if (level.getBlockState(candidate).is(EnchantedForestBlocks.ENCHANTED_HEARTWOOD)) {
-				base = candidate.immutable();
-				break;
+				treeBases++;
+				if (base == null) base = candidate.immutable();
 			}
 		}
+		if (treeBases != 15) problems.add("dense grove placed " + treeBases + "/15 trees");
 		if (base == null) {
 			problems.add("placed tree has no heartwood base");
 		} else {
@@ -88,8 +97,8 @@ public final class EnchantedForestRenderTest implements FabricClientGameTest {
 		if (bears != 1) problems.add("bear summon count=" + bears);
 
 		EnchantedForest.LOGGER.info(
-				"ENCHANTED_FOREST_AUDIT tree={} trunk={} total={} bird={} fox={} bear={} problems={}",
-				base, EnchantedTreeFeature.TRUNK_HEIGHT, EnchantedTreeFeature.TOTAL_HEIGHT,
+				"ENCHANTED_FOREST_AUDIT tree={} grove={} trunk={} total={} bird={} fox={} bear={} problems={}",
+				base, treeBases, EnchantedTreeFeature.TRUNK_HEIGHT, EnchantedTreeFeature.TOTAL_HEIGHT,
 				birds, foxes, bears, problems.isEmpty() ? "none" : problems);
 		if (!problems.isEmpty()) throw new IllegalStateException("Enchanted Forest runtime audit failed: " + problems);
 	}
