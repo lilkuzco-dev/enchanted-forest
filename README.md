@@ -1,5 +1,11 @@
 # Enchanted Forest
 
+## v0.1.7 — full-size biome regions
+
+Enchanted forests now replace complete birch-forest climate entries instead of
+splitting off narrow erosion slices. This prevents tiny enchanted biome islands and
+gives the biome the same practical region scale as vanilla birch forests.
+
 ## v0.1.6 — a forest, not a plains
 
 Tree placement now makes roughly 9–13 successful vanilla-height trees per chunk

@@ -17,14 +17,12 @@ import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
-/** Claims flat/gently rolling birch-forest climates without touching Waldschatten's terrain. */
+/** Replaces complete birch-forest climate entries so enchanted forests generate at full biome scale. */
 public final class EnchantedForestWorldgen {
 	public static final ResourceKey<Biome> ENCHANTED_FOREST =
 			ResourceKey.create(Registries.BIOME, EnchantedForest.id("enchanted_forest"));
 	public static final Feature<NoneFeatureConfiguration> ENCHANTED_TREE = new EnchantedTreeFeature();
 
-	private static final long LOWLAND_MIN = Climate.quantizeCoord(0.05F);
-	private static final long LOWLAND_MAX = Climate.quantizeCoord(1.0F);
 	private static volatile HolderGetter<Biome> biomeLookup;
 
 	public static void rememberBiomeLookup(HolderGetter<Biome> biomes) {
@@ -43,32 +41,19 @@ public final class EnchantedForestWorldgen {
 		}
 
 		List<Pair<Climate.ParameterPoint, Holder<Biome>>> claimed = new ArrayList<>();
-		int slices = 0;
+		int entries = 0;
 		for (Pair<Climate.ParameterPoint, Holder<Biome>> entry : original.values()) {
-			if (!isBirchForest(entry.getSecond())) {
+			if (isBirchForest(entry.getSecond())) {
+				claimed.add(Pair.of(entry.getFirst(), ours.get()));
+				entries++;
+			} else {
 				claimed.add(entry);
-				continue;
-			}
-			Climate.ParameterPoint point = entry.getFirst();
-			long min = Math.max(point.erosion().min(), LOWLAND_MIN);
-			long max = Math.min(point.erosion().max(), LOWLAND_MAX);
-			if (min > max) {
-				claimed.add(entry);
-				continue;
-			}
-			if (point.erosion().min() < min) {
-				claimed.add(Pair.of(withErosion(point, point.erosion().min(), min - 1), entry.getSecond()));
-			}
-			claimed.add(Pair.of(withErosion(point, min, max), ours.get()));
-			slices++;
-			if (max < point.erosion().max()) {
-				claimed.add(Pair.of(withErosion(point, max + 1, point.erosion().max()), entry.getSecond()));
 			}
 		}
 
-		if (slices > 0) {
+		if (entries > 0) {
 			EnchantedForest.LOGGER.info(
-					"Enchanted Forest claimed {} flat/gentle birch-forest climate slices.", slices);
+					"Enchanted Forest claimed {} complete birch-forest climate entries.", entries);
 			return new Climate.ParameterList<>(claimed);
 		}
 		return original;
@@ -78,16 +63,11 @@ public final class EnchantedForestWorldgen {
 		return biome.is(Biomes.BIRCH_FOREST) || biome.is(Biomes.OLD_GROWTH_BIRCH_FOREST);
 	}
 
-	private static Climate.ParameterPoint withErosion(Climate.ParameterPoint point, long min, long max) {
-		return new Climate.ParameterPoint(point.temperature(), point.humidity(), point.continentalness(),
-				new Climate.Parameter(min, max), point.depth(), point.weirdness(), point.offset());
-	}
-
 	public static void register() {
 		Registry.register(BuiltInRegistries.FEATURE,
 				EnchantedForest.id("enchanted_tree"), ENCHANTED_TREE);
 		EnchantedForest.LOGGER.info(
-				"Enchanted Forest will claim flat/gentle birch-forest slices from multi-noise sources.");
+				"Enchanted Forest will claim complete birch-forest entries from multi-noise sources.");
 	}
 
 	private EnchantedForestWorldgen() {
