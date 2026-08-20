@@ -53,7 +53,44 @@ public final class EnchantedForestRenderTest implements FabricClientGameTest {
 			context.takeScreenshot("enchanted_forest_purple_grove_and_wildlife_glint_a");
 			context.waitTicks(20);
 			context.takeScreenshot("enchanted_forest_purple_grove_and_wildlife_glint_b");
+
+			// 0.1.9's crafted planks. A wood set is exactly the kind of addition that ships
+			// unseen: the block registers, the recipe resolves, the loot table drops, every
+			// server-side check is green, and the only thing that can catch a wrong or missing
+			// texture is a frame with the block in it. Both woods go in the same shot so the
+			// two planks are readable against each other and against the logs they came from.
+			server.runCommand("gamemode creative @p");
+			server.runCommand("execute at @p run fill ~-3 ~ ~3 ~-2 ~1 ~4 enchanted_forest:enchanted_heartwood");
+			server.runCommand("execute at @p run fill ~-1 ~ ~3 ~0 ~1 ~4 enchanted_forest:enchanted_heartwood_planks");
+			server.runCommand("execute at @p run fill ~1 ~ ~3 ~2 ~1 ~4 enchanted_forest:enchanted_planks");
+			server.runOnServer(minecraftServer -> auditPlanks(minecraftServer.overworld()));
+			server.runCommand("gamemode spectator @p");
+			server.runCommand("execute at @p run tp @p ~0 ~2 ~-2 0 15");
+			context.waitTicks(40);
+			context.takeScreenshot("enchanted_forest_heartwood_planks_and_planks");
 		}
+	}
+
+	/** 0.1.9: the crafted heartwood planks exist as a real placed block, not just a registry entry. */
+	private static void auditPlanks(net.minecraft.server.level.ServerLevel level) {
+		List<String> problems = new ArrayList<>();
+		BlockPos player = level.players().getFirst().blockPosition();
+		int heartwoodPlanks = 0;
+		int planks = 0;
+		for (BlockPos candidate : BlockPos.betweenClosed(player.offset(-4, -1, 2), player.offset(4, 3, 5))) {
+			if (level.getBlockState(candidate).is(EnchantedForestBlocks.ENCHANTED_HEARTWOOD_PLANKS)) heartwoodPlanks++;
+			if (level.getBlockState(candidate).is(EnchantedForestBlocks.ENCHANTED_PLANKS)) planks++;
+		}
+		// each fill is 2 wide x 2 high x 2 deep
+		if (heartwoodPlanks != 8) problems.add("heartwood planks placed " + heartwoodPlanks + "/8");
+		if (planks != 8) problems.add("enchanted planks placed " + planks + "/8");
+		if (level.recipeAccess().byKey(net.minecraft.resources.ResourceKey.create(
+				Registries.RECIPE, EnchantedForest.id("enchanted_heartwood_planks"))).isEmpty()) {
+			problems.add("heartwood planks recipe missing");
+		}
+		EnchantedForest.LOGGER.info("ENCHANTED_FOREST_PLANKS_AUDIT heartwood_planks={} planks={} problems={}",
+				heartwoodPlanks, planks, problems.isEmpty() ? "none" : problems);
+		if (!problems.isEmpty()) throw new IllegalStateException("Enchanted Forest planks audit failed: " + problems);
 	}
 
 	private static void auditRuntime(net.minecraft.server.level.ServerLevel level) {
