@@ -94,6 +94,7 @@ function textures() {
 	recolorVanilla("oak_log", "enchanted_heartwood", fixedEnchantedHue(0.78, 0.7, 0.86, -0.015));
 	recolorVanilla("oak_log_top", "enchanted_heartwood_top", fixedEnchantedHue(0.78, 0.76, 0.92));
 	recolorVanilla("oak_planks", "enchanted_planks", fixedEnchantedHue(0.76, 0.68, 0.97, 0.015));
+	recolorVanilla("oak_planks", "enchanted_heartwood_planks", fixedEnchantedHue(0.82, 0.76, 0.88, 0.005));
 	recolorVanilla("oak_leaves", "enchanted_leaves", fixedEnchantedHue(0.73, 0.76, 1.04, 0.015));
 	recolorVanilla("oak_sapling", "enchanted_sapling", fixedEnchantedHue(0.75, 0.75, 1.04, 0.015));
 
@@ -135,6 +136,7 @@ const BLOCKS = {
 	enchanted_heartwood: { name: "Enchanted Heartwood", kind: "pillar", side: "enchanted_heartwood", top: "enchanted_heartwood_top" },
 	enchanted_log: { name: "Enchanted Log", kind: "pillar", side: "enchanted_log", top: "enchanted_log_top" },
 	enchanted_planks: { name: "Enchanted Planks", kind: "cube" },
+	enchanted_heartwood_planks: { name: "Purple Enchanted Planks", kind: "cube" },
 	enchanted_leaves: { name: "Enchanted Leaves", kind: "leaves" },
 	enchanted_sapling: { name: "Enchanted Sapling", kind: "cross" },
 	starflower: { name: "Starflower", kind: "cross" },
@@ -180,7 +182,12 @@ function assets() {
 	write(A("lang", "en_us.json"), Object.fromEntries(Object.entries(lang).sort()));
 	write(D("recipe", "enchanted_planks.json"), {
 		type: "minecraft:crafting_shapeless", category: "building", group: "planks",
-		ingredients: [`#${NS}:enchanted_logs`], result: { count: 4, id: `${NS}:enchanted_planks` },
+		ingredients: [`${NS}:enchanted_log`], result: { count: 4, id: `${NS}:enchanted_planks` },
+	});
+	write(D("recipe", "enchanted_heartwood_planks.json"), {
+		type: "minecraft:crafting_shapeless", category: "building", group: "planks",
+		ingredients: [`${NS}:enchanted_heartwood`],
+		result: { count: 4, id: `${NS}:enchanted_heartwood_planks` },
 	});
 }
 
@@ -288,10 +295,11 @@ function tags() {
 	const logs = [`${NS}:enchanted_heartwood`, `${NS}:enchanted_log`];
 	writeTag("minecraft", "block/logs", logs); writeTag("minecraft", "block/logs_that_burn", logs);
 	writeTag("minecraft", "item/logs", logs); writeTag("minecraft", "item/logs_that_burn", logs);
-	writeTag("minecraft", "block/planks", [`${NS}:enchanted_planks`]); writeTag("minecraft", "item/planks", [`${NS}:enchanted_planks`]);
+	const planks = [`${NS}:enchanted_planks`, `${NS}:enchanted_heartwood_planks`];
+	writeTag("minecraft", "block/planks", planks); writeTag("minecraft", "item/planks", planks);
 	writeTag("minecraft", "block/leaves", [`${NS}:enchanted_leaves`]); writeTag("minecraft", "item/leaves", [`${NS}:enchanted_leaves`]);
 	writeTag("minecraft", "block/saplings", [`${NS}:enchanted_sapling`]); writeTag("minecraft", "item/saplings", [`${NS}:enchanted_sapling`]);
-	writeTag("minecraft", "block/mineable/axe", [...logs, `${NS}:enchanted_planks`]);
+	writeTag("minecraft", "block/mineable/axe", [...logs, ...planks]);
 	writeTag("minecraft", "block/mineable/hoe", [`${NS}:enchanted_leaves`]);
 	writeTag("minecraft", "block/replaceable_by_trees", [`${NS}:starflower`, `${NS}:fairy_bloom`, `${NS}:crystal_moss`, `${NS}:enchanted_sapling`]);
 	writeTag("minecraft", "worldgen/biome/is_forest", [`${NS}:enchanted_forest`]);

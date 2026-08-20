@@ -1,5 +1,12 @@
 # Enchanted Forest
 
+## v0.1.9 — separate heartwood planks
+
+Purple enchanted heartwood now crafts into its own Purple Enchanted Planks block.
+The ordinary enchanted log continues to craft into Enchanted Planks; the two recipes
+use exact block ingredients instead of the shared enchanted-log tag, so neither wood
+variant can resolve to the other's plank color.
+
 ## v0.1.8 — forest-floor placement and true armor glint
 
 Enchanted trees now accept grass blocks as valid soil under Minecraft 26.2,

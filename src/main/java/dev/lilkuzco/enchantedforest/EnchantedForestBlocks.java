@@ -29,6 +29,9 @@ public final class EnchantedForestBlocks {
 	public static final Block ENCHANTED_PLANKS = new Block(
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(2.0F, 3.0F)
 					.sound(SoundType.WOOD).ignitedByLava().setId(blockKey("enchanted_planks")));
+	public static final Block ENCHANTED_HEARTWOOD_PLANKS = new Block(
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, 3.0F)
+					.sound(SoundType.WOOD).ignitedByLava().setId(blockKey("enchanted_heartwood_planks")));
 	public static final Block ENCHANTED_LEAVES = new UntintedParticleLeavesBlock(
 			0.035F, ParticleTypes.GLOW,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.2F)
@@ -63,6 +66,7 @@ public final class EnchantedForestBlocks {
 		register("enchanted_heartwood", ENCHANTED_HEARTWOOD);
 		register("enchanted_log", ENCHANTED_LOG);
 		register("enchanted_planks", ENCHANTED_PLANKS);
+		register("enchanted_heartwood_planks", ENCHANTED_HEARTWOOD_PLANKS);
 		register("enchanted_leaves", ENCHANTED_LEAVES);
 		register("enchanted_sapling", ENCHANTED_SAPLING);
 		register("starflower", STARFLOWER);
@@ -75,6 +79,7 @@ public final class EnchantedForestBlocks {
 		fire.add(ENCHANTED_HEARTWOOD, 5, 5);
 		fire.add(ENCHANTED_LOG, 5, 5);
 		fire.add(ENCHANTED_PLANKS, 5, 20);
+		fire.add(ENCHANTED_HEARTWOOD_PLANKS, 5, 20);
 		fire.add(ENCHANTED_LEAVES, 30, 60);
 	}
 

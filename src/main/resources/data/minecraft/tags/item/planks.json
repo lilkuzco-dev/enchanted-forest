@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "enchanted_forest:enchanted_planks"
+    "enchanted_forest:enchanted_planks",
+    "enchanted_forest:enchanted_heartwood_planks"
   ]
 }

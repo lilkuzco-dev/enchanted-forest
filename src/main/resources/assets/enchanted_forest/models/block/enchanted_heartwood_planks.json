@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "enchanted_forest:block/enchanted_heartwood_planks"
+  }
+}

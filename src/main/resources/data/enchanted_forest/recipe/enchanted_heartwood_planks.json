@@ -3,10 +3,10 @@
   "category": "building",
   "group": "planks",
   "ingredients": [
-    "enchanted_forest:enchanted_log"
+    "enchanted_forest:enchanted_heartwood"
   ],
   "result": {
     "count": 4,
-    "id": "enchanted_forest:enchanted_planks"
+    "id": "enchanted_forest:enchanted_heartwood_planks"
   }
 }
