@@ -50,7 +50,9 @@ public final class EnchantedForestRenderTest implements FabricClientGameTest {
 			server.runCommand("gamemode spectator @p");
 			server.runCommand("execute at @p run tp @p ~0 ~4 ~-12 0 10");
 			context.waitTicks(60);
-			context.takeScreenshot("enchanted_forest_purple_grove_and_wildlife");
+			context.takeScreenshot("enchanted_forest_purple_grove_and_wildlife_glint_a");
+			context.waitTicks(20);
+			context.takeScreenshot("enchanted_forest_purple_grove_and_wildlife_glint_b");
 		}
 	}
 

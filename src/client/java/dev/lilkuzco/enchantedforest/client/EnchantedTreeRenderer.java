@@ -35,7 +35,7 @@ public final class EnchantedTreeRenderer
 	@Override
 	public void submit(EnchantedTreeRenderState state, PoseStack poseStack,
 			SubmitNodeCollector queue, CameraRenderState cameraState) {
-		queue.order(0).submitCustomGeometry(poseStack, RenderTypes.glint(),
+		queue.order(0).submitCustomGeometry(poseStack, RenderTypes.armorEntityGlint(),
 				(pose, buffer) -> renderTrunkGlint(pose, buffer));
 	}
 

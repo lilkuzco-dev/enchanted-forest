@@ -29,7 +29,11 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 		WorldGenLevel level = context.level();
 		BlockPos origin = context.origin();
 		RandomSource random = context.random();
-		if (!level.getBlockState(origin.below()).is(BlockTags.DIRT) || !hasRoom(level, origin)) {
+		BlockState soil = level.getBlockState(origin.below());
+		// In 26.2 grass blocks are no longer members of #minecraft:dirt. Since
+		// the heightmap normally places forest features directly above grass,
+		// checking only that tag rejects almost every configured tree attempt.
+		if ((!soil.is(Blocks.GRASS_BLOCK) && !soil.is(BlockTags.DIRT)) || !hasRoom(level, origin)) {
 			return false;
 		}
 

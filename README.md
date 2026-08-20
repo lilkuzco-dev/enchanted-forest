@@ -1,5 +1,12 @@
 # Enchanted Forest
 
+## v0.1.8 — forest-floor placement and true armor glint
+
+Enchanted trees now accept grass blocks as valid soil under Minecraft 26.2,
+so the configured 18 attempts per chunk can actually produce a dense forest.
+Tree trunks also use the real armor-glint texture transform and layering mode,
+with two timed render-test frames covering the animated effect.
+
 ## v0.1.7 — full-size biome regions
 
 Enchanted forests now replace complete birch-forest climate entries instead of
