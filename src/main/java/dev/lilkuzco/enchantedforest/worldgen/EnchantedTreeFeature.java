@@ -37,12 +37,19 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 			return false;
 		}
 
+		// One tree, one palette. Roughly a third of the grove grows the azure strain, so the
+		// forest reads as violet with blue among it rather than uniformly purple — without
+		// reintroducing the mismatched-single-tree look that unified the palette in the
+		// first place.
+		boolean azure = random.nextFloat() < 0.34F;
+		net.minecraft.world.level.block.Block trunkBlock =
+				azure ? EnchantedForestBlocks.ENCHANTED_AZURE_LOG : EnchantedForestBlocks.ENCHANTED_LOG;
 		level.setBlock(origin, EnchantedForestBlocks.ENCHANTED_HEARTWOOD.defaultBlockState(), 2);
 		for (int y = 1; y < TRUNK_HEIGHT; y++) {
-			level.setBlock(origin.above(y), EnchantedForestBlocks.ENCHANTED_LOG.defaultBlockState(), 2);
+			level.setBlock(origin.above(y), trunkBlock.defaultBlockState(), 2);
 		}
 
-		placeCanopy(level, origin, random);
+		placeCanopy(level, origin, random, azure);
 		placeGlowBerryVines(level, origin, random);
 		placeSporeBlossoms(level, origin);
 		return true;
@@ -78,7 +85,7 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 		return true;
 	}
 
-	private static void placeCanopy(WorldGenLevel level, BlockPos origin, RandomSource random) {
+	private static void placeCanopy(WorldGenLevel level, BlockPos origin, RandomSource random, boolean azure) {
 		for (int layer = 0; layer < CANOPY_RADII.length; layer++) {
 			int y = CANOPY_BASE_Y + layer;
 			int radius = CANOPY_RADII[layer];
@@ -96,7 +103,8 @@ public final class EnchantedTreeFeature extends Feature<NoneFeatureConfiguration
 					}
 					int logDistance = Math.min(7, Math.max(1, Math.abs(x) + Math.abs(z)
 							+ Math.max(0, y - (TRUNK_HEIGHT - 1))));
-					BlockState leaves = EnchantedForestBlocks.ENCHANTED_LEAVES.defaultBlockState()
+					BlockState leaves = (azure ? EnchantedForestBlocks.ENCHANTED_AZURE_LEAVES
+							: EnchantedForestBlocks.ENCHANTED_LEAVES).defaultBlockState()
 							.setValue(LeavesBlock.DISTANCE, logDistance)
 							.setValue(LeavesBlock.PERSISTENT, false);
 					BlockPos pos = origin.offset(x, y, z);

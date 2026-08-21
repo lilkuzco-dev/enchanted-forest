@@ -115,12 +115,15 @@ public final class EnchantedForestRenderTest implements FabricClientGameTest {
 			problems.add("placed tree has no heartwood base");
 		} else {
 			for (int y = 1; y < EnchantedTreeFeature.TRUNK_HEIGHT; y++) {
-				if (!level.getBlockState(base.above(y)).is(EnchantedForestBlocks.ENCHANTED_LOG)) {
+				if (!level.getBlockState(base.above(y)).is(EnchantedForestBlocks.ENCHANTED_LOG)
+						&& !level.getBlockState(base.above(y)).is(EnchantedForestBlocks.ENCHANTED_AZURE_LOG)) {
 					problems.add("trunk is broken at y=" + y);
 				}
 			}
 			if (level.getBlockState(base.above(EnchantedTreeFeature.TRUNK_HEIGHT))
-					.is(EnchantedForestBlocks.ENCHANTED_LOG)) problems.add("trunk exceeds normal height");
+					.is(EnchantedForestBlocks.ENCHANTED_LOG)
+					|| level.getBlockState(base.above(EnchantedTreeFeature.TRUNK_HEIGHT))
+					.is(EnchantedForestBlocks.ENCHANTED_AZURE_LOG)) problems.add("trunk exceeds normal height");
 			for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) for (int y = EnchantedTreeFeature.TOTAL_HEIGHT; y <= 12; y++) {
 				if (level.getBlockState(base.offset(x, y, z)).is(EnchantedForestBlocks.ENCHANTED_LEAVES)) {
 					problems.add("canopy exceeds normal height");

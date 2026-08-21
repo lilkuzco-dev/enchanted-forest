@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "enchanted_forest:enchanted_leaves"
+    "enchanted_forest:enchanted_leaves",
+    "enchanted_forest:enchanted_azure_leaves"
   ]
 }

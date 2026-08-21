@@ -42,6 +42,17 @@ public final class EnchantedForestBlocks {
 					.ignitedByLava().pushReaction(PushReaction.DESTROY)
 					.isRedstoneConductor((state, level, pos) -> false)
 					.setId(blockKey("enchanted_leaves")));
+	public static final Block ENCHANTED_AZURE_LOG = new RotatedPillarBlock(woodProperties("enchanted_azure_log"));
+	public static final Block ENCHANTED_AZURE_LEAVES = new UntintedParticleLeavesBlock(
+			0.035F, ParticleTypes.GLOW,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(0.2F)
+					.randomTicks().sound(SoundType.GRASS).noOcclusion().lightLevel(state -> 3)
+					.isValidSpawn((state, level, pos, type) -> false)
+					.isSuffocating((state, level, pos) -> false)
+					.isViewBlocking((state, level, pos) -> false)
+					.ignitedByLava().pushReaction(PushReaction.DESTROY)
+					.isRedstoneConductor((state, level, pos) -> false)
+					.setId(blockKey("enchanted_azure_leaves")));
 
 	public static final TreeGrower ENCHANTED_TREE_GROWER = new TreeGrower(
 			"enchanted_forest_tree", java.util.Optional.empty(),
@@ -68,6 +79,8 @@ public final class EnchantedForestBlocks {
 		register("enchanted_planks", ENCHANTED_PLANKS);
 		register("enchanted_heartwood_planks", ENCHANTED_HEARTWOOD_PLANKS);
 		register("enchanted_leaves", ENCHANTED_LEAVES);
+		register("enchanted_azure_log", ENCHANTED_AZURE_LOG);
+		register("enchanted_azure_leaves", ENCHANTED_AZURE_LEAVES);
 		register("enchanted_sapling", ENCHANTED_SAPLING);
 		register("starflower", STARFLOWER);
 		register("fairy_bloom", FAIRY_BLOOM);
@@ -80,6 +93,8 @@ public final class EnchantedForestBlocks {
 		fire.add(ENCHANTED_LOG, 5, 5);
 		fire.add(ENCHANTED_PLANKS, 5, 20);
 		fire.add(ENCHANTED_HEARTWOOD_PLANKS, 5, 20);
+		fire.add(ENCHANTED_AZURE_LOG, 5, 5);
+		fire.add(ENCHANTED_AZURE_LEAVES, 30, 60);
 		fire.add(ENCHANTED_LEAVES, 30, 60);
 	}
 

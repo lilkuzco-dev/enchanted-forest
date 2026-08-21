@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "enchanted_forest:block/enchanted_azure_leaves"
+  }
+}

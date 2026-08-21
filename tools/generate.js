@@ -98,6 +98,15 @@ function textures() {
 	recolorVanilla("oak_leaves", "enchanted_leaves", fixedEnchantedHue(0.73, 0.76, 1.04, 0.015));
 	recolorVanilla("oak_sapling", "enchanted_sapling", fixedEnchantedHue(0.75, 0.75, 1.04, 0.015));
 
+	// The azure strain. The violet palette above exists because a cyan trunk under teal
+	// leaves made a single tree look mismatched — that ruling stands, and this does not
+	// undo it: an azure tree is azure all the way up, trunk and canopy together, and the
+	// grove mixes whole trees rather than parts. Hue sits near 0.56 so it reads as a clear
+	// blue beside the violet instead of a slightly-off purple.
+	recolorVanilla("oak_log", "enchanted_azure_log", fixedEnchantedHue(0.57, 0.68, 0.94, 0.015));
+	recolorVanilla("oak_log_top", "enchanted_azure_log_top", fixedEnchantedHue(0.56, 0.70, 0.98, 0.01));
+	recolorVanilla("oak_leaves", "enchanted_azure_leaves", fixedEnchantedHue(0.55, 0.74, 1.06, 0.015));
+
 	// Custom luminous plants now retain familiar vanilla silhouettes.
 	recolorVanilla("allium", "starflower", recolorPlant(0.51));
 	recolorVanilla("oxeye_daisy", "fairy_bloom", recolorPlant(0.78));
@@ -138,6 +147,8 @@ const BLOCKS = {
 	enchanted_planks: { name: "Enchanted Planks", kind: "cube" },
 	enchanted_heartwood_planks: { name: "Purple Enchanted Planks", kind: "cube" },
 	enchanted_leaves: { name: "Enchanted Leaves", kind: "leaves" },
+	enchanted_azure_log: { name: "Azure Enchanted Log", kind: "pillar", side: "enchanted_azure_log", top: "enchanted_azure_log_top" },
+	enchanted_azure_leaves: { name: "Azure Enchanted Leaves", kind: "leaves" },
 	enchanted_sapling: { name: "Enchanted Sapling", kind: "cross" },
 	starflower: { name: "Starflower", kind: "cross" },
 	fairy_bloom: { name: "Fairy Bloom", kind: "cross" },
@@ -292,15 +303,16 @@ function worldgen() {
 
 function tags() {
 	const writeTag = (namespace, pathName, values) => write(path.join(ROOT, "data", namespace, "tags", ...pathName.split("/")) + ".json", { replace: false, values });
-	const logs = [`${NS}:enchanted_heartwood`, `${NS}:enchanted_log`];
+	const logs = [`${NS}:enchanted_heartwood`, `${NS}:enchanted_log`, `${NS}:enchanted_azure_log`];
 	writeTag("minecraft", "block/logs", logs); writeTag("minecraft", "block/logs_that_burn", logs);
 	writeTag("minecraft", "item/logs", logs); writeTag("minecraft", "item/logs_that_burn", logs);
 	const planks = [`${NS}:enchanted_planks`, `${NS}:enchanted_heartwood_planks`];
 	writeTag("minecraft", "block/planks", planks); writeTag("minecraft", "item/planks", planks);
-	writeTag("minecraft", "block/leaves", [`${NS}:enchanted_leaves`]); writeTag("minecraft", "item/leaves", [`${NS}:enchanted_leaves`]);
+	const leaves = [`${NS}:enchanted_leaves`, `${NS}:enchanted_azure_leaves`];
+	writeTag("minecraft", "block/leaves", leaves); writeTag("minecraft", "item/leaves", leaves);
 	writeTag("minecraft", "block/saplings", [`${NS}:enchanted_sapling`]); writeTag("minecraft", "item/saplings", [`${NS}:enchanted_sapling`]);
 	writeTag("minecraft", "block/mineable/axe", [...logs, ...planks]);
-	writeTag("minecraft", "block/mineable/hoe", [`${NS}:enchanted_leaves`]);
+	writeTag("minecraft", "block/mineable/hoe", leaves);
 	writeTag("minecraft", "block/replaceable_by_trees", [`${NS}:starflower`, `${NS}:fairy_bloom`, `${NS}:crystal_moss`, `${NS}:enchanted_sapling`]);
 	writeTag("minecraft", "worldgen/biome/is_forest", [`${NS}:enchanted_forest`]);
 	writeTag("minecraft", "worldgen/biome/is_overworld", [`${NS}:enchanted_forest`]);
