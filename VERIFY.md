@@ -66,3 +66,40 @@ produces — no hand-edit has drifted in. ✅
   world's directories predate 0.1.9. The frames above are from a throwaway gametest world.
 - Nobody has crafted the planks on the live server. The recipe is proven to load, not to
   have been used.
+
+## v0.1.11 — the claim no longer cancels (2026-08-22)
+
+### The bug
+
+Enchanted Forest and Waldschatten both rewrite `MultiNoiseBiomeSource.parameters()`, and
+both did it with `@Inject(at = RETURN, cancellable = true)` + `setReturnValue`. Mixin emits
+`if (cancelled) return` after each callback at an injection point, so the first handler to
+cancel ends the method and every later handler is skipped — silently, because the loser's
+code is never entered and cannot log that it lost. This mod's config registers first, so it
+claimed its 176 birch entries and Waldschatten's biome was absent from every world on every
+client and on the server from the day both entered `mods.json` (2026-08-19). Found from
+Jesse's client log: `Enchanted Forest claimed 176 …` present, no Waldschatten claim line.
+
+Had the load order gone the other way, this mod would have been the one silently missing.
+
+### The fix
+
+`MultiNoiseBiomeSourceMixin` now uses MixinExtras `@ModifyReturnValue` (bundled in Fabric
+Loader 0.19.3; no new dependency). Modifiers chain — each receives the previous one's
+output — so both claims land whichever applies first. The two claims touch disjoint biomes
+(birch forests here; forest/dark forest there), so order does not change the result.
+Nothing else changed: same `claimIn`, same memoisation, same biomes.
+
+### Evidence
+
+Waldschatten 0.1.3's headless release survey stages this jar (built from `9ea859d`) beside
+it and asserts **both** biomes are offered and sampled. 12/12 seeds passed on the combined
+set — six vanilla, six with Terralith + lithostitched + empire_worldgen — every run logging
+both claim lines in the same source. Enchanted forest share: 2.51–4.57% of 4,225 cells on
+vanilla, 0.52–1.61% on the Terralith stack. Full table in `waldschatten/VERIFY.md`. In one
+Terralith run the modifiers applied in the opposite order and both still landed. ✅
+
+### Not covered
+
+- The render battery was not rerun: 0.1.11 draws nothing new. The 0.1.10 frames stand.
+- Biome presence on the live server world is a fresh-chunk question.
